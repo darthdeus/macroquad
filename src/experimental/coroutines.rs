@@ -9,11 +9,12 @@ use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use crate::exec::resume;
+use crate::exec::{resume, FrameFuture};
 use crate::get_context;
 
 mod generational_storage;
 
+use futures::future::FusedFuture;
 use generational_storage::{GenerationalId, GenerationalStorage};
 
 struct CoroutineInternal {
@@ -253,6 +254,18 @@ impl Future for TimerDelayFuture {
         } else {
             Poll::Pending
         }
+    }
+}
+
+impl FusedFuture for TimerDelayFuture {
+    fn is_terminated(&self) -> bool {
+        false
+    }
+}
+
+impl FusedFuture for FrameFuture {
+    fn is_terminated(&self) -> bool {
+        false
     }
 }
 
